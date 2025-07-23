@@ -1,1 +1,6 @@
 langchain
+# arxiv
+langchain_groq
+langchain_community
+dotenv
+duckduckgo-search
