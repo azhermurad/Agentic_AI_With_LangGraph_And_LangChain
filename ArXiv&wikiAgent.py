@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
-from langchain.agents import AgentExecutor,create_react_agent
-from langchain_community.agent_toolkits.load_tools import load_tools
+from langchain.agents import AgentExecutor
 from langchain_groq import ChatGroq
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -15,9 +14,6 @@ from langchain_community.utilities import ArxivAPIWrapper
 from dotenv import load_dotenv
 load_dotenv()
 
-
-
-
 # load environment variables
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
@@ -26,10 +22,10 @@ os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama-3.1-8b-instant")
 
 
-wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-arxiv = ArxivQueryRun(api_wrapper=ArxivAPIWrapper())
+wikipedia_tool = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(top_k_results=1,doc_content_chars_max=400))
+arxiv_tool = ArxivQueryRun(api_wrapper=ArxivAPIWrapper(top_k_results=1,doc_content_chars_max=400))
 
-tools = [wikipedia, arxiv]
+tools = [wikipedia_tool, arxiv_tool]
 from langchain import hub
 
 # Get the prompt to use - you can modify this!
@@ -44,4 +40,4 @@ from langchain.agents import AgentExecutor
 
 agent_executor = AgentExecutor(agent=agent, tools=tools,verbose=True)
 
-agent_executor.invoke({"input": "who is azher ali data scientist?"})
+agent_executor.invoke({"input": "what is the full form of NATO"})

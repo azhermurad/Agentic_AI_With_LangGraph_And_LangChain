@@ -5,3 +5,7 @@ langchain_groq
 langchain_community
 dotenv
 duckduckgo-search
+langchain_huggingface
+sentence-transformers
+faiss-cpu
+streamlit
