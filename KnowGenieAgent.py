@@ -1,0 +1,123 @@
+import streamlit as st
+import os
+from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_groq import ChatGroq
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain import hub
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.tools.retriever import create_retriever_tool
+from langchain_community.tools import WikipediaQueryRun
+from langchain_community.utilities import WikipediaAPIWrapper
+from langchain_community.tools import ArxivQueryRun
+from langchain_community.utilities import ArxivAPIWrapper
+from langchain import hub
+from langchain_community.callbacks.streamlit import (
+    StreamlitCallbackHandler,
+)
+
+
+st.title("Chat With Search (Wiki,Arxiv,And Azher Ali(RAG))")
+st.set_page_config(layout="wide")
+"""This multi-source agent empowers users to explore topics with
+🔎 trusted,  up-to-date, and  personalized information —
+perfect for  students,  researchers, and  professionals!"""
+
+# page with
+
+
+# api key
+with st.sidebar:
+    st.title("Settings")
+
+    os.environ["GROQ_API_KEY"] = st.text_input("API KEY OF GROQ", type="password")
+    x = st.slider("x")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
+            "role": "assistant",
+            "content": "Hi, I'am a Agent JamXT which have power of search wikipiedia, arxvi, and your local documents, How can I help you?",
+        }
+    ]
+
+
+# message container
+msg_container = st.container()
+
+for msg in st.session_state.messages:
+    with msg_container.chat_message(msg["role"]):
+        st.write(msg["content"])
+
+
+print(bool(os.environ["GROQ_API_KEY"]))
+if input := st.chat_input(
+    "Say something!", disabled=not bool(os.environ["GROQ_API_KEY"])
+):
+    # llm model
+    llm = ChatGroq(model="llama-3.1-8b-instant")
+
+    if "retriever" not in st.session_state:
+        print("in the retriver function")
+        # embedding
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={"device": "cpu"},
+        )
+
+        # load document
+        loader = WebBaseLoader("https://github.com/azhermurad")
+        docs = loader.load()
+
+        # split document into chunks
+        documents = RecursiveCharacterTextSplitter(
+            chunk_size=1000, chunk_overlap=200
+        ).split_documents(docs)
+
+        # vector store
+        vector = FAISS.from_documents(documents, embeddings)
+
+        # retriver
+        retriever = vector.as_retriever()
+
+        st.session_state["retriever"] = retriever
+
+    retriever_tool = create_retriever_tool(
+        st.session_state.retriever,
+        "personal_infomation_search",
+        "Search for information about azher ali. For any questions about azher ali, you must use this tool!",
+    )
+
+    # tools
+    wikipedia_tool = WikipediaQueryRun(
+        api_wrapper=WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=400)
+    )
+    arxiv_tool = ArxivQueryRun(
+        api_wrapper=ArxivAPIWrapper(top_k_results=1, doc_content_chars_max=400)
+    )
+    tools = [wikipedia_tool, arxiv_tool, retriever_tool]
+
+    prompt = hub.pull("hwchase17/openai-functions-agent")
+    # create agent
+    agent = create_tool_calling_agent(llm, tools, prompt)
+    agent_executor = AgentExecutor(
+        agent=agent, tools=tools, verbose=True, handle_parsing_errors=True
+    )
+
+    st.session_state.messages.append({"role": "user", "content": input})
+    with msg_container.chat_message(
+        "user",
+        avatar="https://media.licdn.com/dms/image/v2/D4D03AQELrOU4Hf6Jeg/profile-displayphoto-scale_100_100/B4DZf.QMXBHkAg-/0/1752317351587?e=1756339200&v=beta&t=aVlXfjLRnFJU2pkBU_g_nlPYTpyfQdPEtq4tX3glA_c",
+    ):
+        st.write(input)
+
+    with st.chat_message("assistant"):
+        st_callback = StreamlitCallbackHandler(st.container())
+        response = agent_executor.invoke({"input": input}, {"callbacks": [st_callback]})
+        st.session_state.messages.append(
+            {"role": "assistant", "content": response["output"]}
+        )
+        st.write(response["output"])
+else:
+    st.warning("API key is missing!!!")
