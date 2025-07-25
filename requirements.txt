@@ -9,3 +9,5 @@ langchain_huggingface
 sentence-transformers
 faiss-cpu
 streamlit
+langgraph
+pypdf
