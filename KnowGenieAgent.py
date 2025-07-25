@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain.agents import AgentExecutor, create_react_agent,create_tool_calling_agent
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import FAISS
@@ -131,7 +131,13 @@ if bool(os.environ["GROQ_API_KEY"]):
             else [wikipedia_tool, arxiv_tool]
         )
 
+
         prompt = hub.pull("hwchase17/openai-functions-agent")
+        # tool calling prompt
+        
+        
+        
+        
         # create agent
         agent = create_tool_calling_agent(llm, tools, prompt)
         agent_executor = AgentExecutor(
