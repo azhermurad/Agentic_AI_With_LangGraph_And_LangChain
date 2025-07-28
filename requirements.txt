@@ -11,3 +11,4 @@ faiss-cpu
 streamlit
 langgraph
 pypdf
+pymysql
