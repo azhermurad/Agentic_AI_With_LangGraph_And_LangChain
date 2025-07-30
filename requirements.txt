@@ -12,3 +12,5 @@ streamlit
 langgraph
 pypdf
 pymysql
+youtube-transcript-api
+pytube
