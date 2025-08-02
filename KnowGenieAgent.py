@@ -75,7 +75,7 @@ with st.sidebar:
          
 
             # vector store
-            vector = FAISS.from_documents(documents, embeddings)
+            vector = FAISS.from_documents(docs, embeddings)
 
             # retriver
             retriever = vector.as_retriever()

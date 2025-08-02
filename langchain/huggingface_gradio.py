@@ -26,7 +26,6 @@ llm = HuggingFaceEndpoint(
 
 chat_model = ChatHuggingFace(llm=llm)
 
-print()
 
 
 def generateText(text):
