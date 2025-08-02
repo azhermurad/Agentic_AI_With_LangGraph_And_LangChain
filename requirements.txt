@@ -6,6 +6,7 @@ langchain_community
 dotenv
 duckduckgo-search
 langchain_huggingface
+huggingface_hub
 sentence-transformers
 faiss-cpu
 streamlit
@@ -14,3 +15,5 @@ pypdf
 pymysql
 youtube-transcript-api
 pytube
+langchain-astradb
+gradio

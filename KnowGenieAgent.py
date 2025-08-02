@@ -72,10 +72,7 @@ with st.sidebar:
             loader = WebBaseLoader("https://github.com/azhermurad")
             docs = loader.load()
 
-            # split document into chunks
-            documents = RecursiveCharacterTextSplitter(
-                chunk_size=1000, chunk_overlap=200
-            ).split_documents(docs)
+         
 
             # vector store
             vector = FAISS.from_documents(documents, embeddings)
