@@ -17,3 +17,7 @@ youtube-transcript-api
 pytube
 langchain-astradb
 gradio
+neo4j
+langchain-neo4j
+tiktoken
+openai
