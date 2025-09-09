@@ -21,3 +21,4 @@ neo4j
 langchain-neo4j
 tiktoken
 openai
+IPython

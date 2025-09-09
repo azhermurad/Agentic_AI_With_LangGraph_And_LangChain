@@ -24,28 +24,47 @@ def multiply(a: int, b: int) -> int:
     """
     return a * b
 
+def add(a: int, b: int) -> int:
+    """add a and b.
+
+    Args:
+        a: first int
+        b: second int
+    """
+    return a + b
+
+
+def divide(a: int, b: int) -> int:
+    """divide a and b.
+
+    Args:
+        a: first int
+        b: second int
+    """
+    return a / b
 
 # llm model
 llm = ChatGroq(model="llama-3.1-8b-instant")
-llm_with_tools = llm.bind_tools([multiply])
+llm_with_tools = llm.bind_tools([multiply,add,divide])
 
 
 # define the state
 class State(MessagesState):
     pass
 
-
 # node
-
 
 def chatbot(state: State):
     print(state["messages"])
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
-# define the tool function so that the model can run the tool function 
 
+# create the graph state 
 
 builder = StateGraph(State)
+
+# now we have to add the node to the graph 
+
 # add node in the graph (node are used to update the state of the graph)
 builder.add_node("chatbot", chatbot)
 builder.add_node("tools", ToolNode(tools=[multiply]))
@@ -55,36 +74,12 @@ builder.add_conditional_edges("chatbot",tools_condition)
 builder.add_edge("tools", "chatbot")
 builder.add_edge(START, "chatbot")
 # compile the graph
+# now we have to define the compile of the main option to 
 graph = builder.compile()
 
-with open("diagram.png", "wb") as f:
-    f.write(graph.get_graph().draw_mermaid_png())
-print("Saved diagram.png")
+
+# act let the model to call the specfic tool from the llm 
+# observe : pass the tool output back to the model 
+#reason: let the model reason about the tool output to decides what to do next(or called another tool or direct the output to the user)
 
 
-def stream_graph_updates(user_input: str):
-    for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}):
-        for value in event.values():
-            print("Assistant:", value["messages"][-1].content)
-
-while True:
-    try:
-        user_input = input("User: ")
-        if user_input.lower() in ["quit", "exit", "q"]:
-            print("Goodbye!")
-            break
-
-        stream_graph_updates(user_input)
-    except:
-        # fallback if input() is not available
-        user_input = "What do you know about LangGraph?"
-        print("User: " + user_input)
-        stream_graph_updates(user_input)
-        break
-    
-
-
-
-# with open("diagram.png", "wb") as f:
-#     f.write(graph.get_graph().draw_mermaid_png())
-# print("Saved diagram.png")
