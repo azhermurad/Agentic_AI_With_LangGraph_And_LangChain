@@ -91,64 +91,44 @@ builder.add_edge(START, "chatbot")
 builder.add_conditional_edges("chatbot", tools_condition)
 builder.add_edge("tools", "chatbot")
 
-# compile the graph
-# now we have to define the compile of the main option to
-react_graph = builder.compile()
-
-# with open("diagram.png", "wb") as f:
-#     f.write(react_graph.get_graph().draw_mermaid_png())
-# print("Saved diagram.png")
 
 
-result = react_graph.invoke(
-    {"messages": [HumanMessage(content="nlp stands for only?")]}
+
+
+
+
+# add memory to the list
+
+from langgraph.checkpoint.memory import InMemorySaver
+
+memory = InMemorySaver()
+config = {"configurable": {"thread_id": "1"}}
+
+graph_with_memory = builder.compile(checkpointer=memory)
+
+answers = graph_with_memory.invoke(
+    {"messages": [HumanMessage(content="Hi there! My name is Azher Ali.")]}, config
 )
-
-print(result)
-
-
-answers = react_graph.invoke(
-    {
-        "messages": [
-            HumanMessage(content="add 2 and 3. multipy 4 and 6, and divide 8 and 8")
-        ]
-    }
-)
-
 
 for m in answers["messages"]:
     m.pretty_print()
 
 
-# add memory to the list
+user_input = "Remember my name?"
 
-# from langgraph.checkpoint.memory import InMemorySaver
-
-# memory = InMemorySaver()
-# config = {"configurable": {"thread_id": "1"}}
-
-# graph_with_memory = builder.compile(checkpointer=memory)
-
-# answers = graph_with_memory.invoke(
-#     {"messages": [HumanMessage(content="Hi there! My name is Azher Ali.")]}, config
-# )
-
-# for m in answers["messages"]:
-#     m.pretty_print()
-
-
-# user_input = "Remember my name?"
-
-# # The config is the **second positional argument** to stream() or invoke()!
-# answers = graph_with_memory.invoke(
-#     {"messages": [HumanMessage(content=user_input)]},
-#     config
+# The config is the **second positional argument** to stream() or invoke()!
+answers = graph_with_memory.invoke(
+    {"messages": [HumanMessage(content=user_input)]},
+    config
     
-# )
+)
 
-# for m in answers["messages"]:
-#     m.pretty_print()
+for m in answers["messages"]:
+    m.pretty_print()
 
+
+snapshot = graph_with_memory.get_state(config)
+print(snapshot)
 
 # act let the model to call the specfic tool from the llm
 # observe : pass the tool output back to the model
