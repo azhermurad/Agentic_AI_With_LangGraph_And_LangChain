@@ -104,31 +104,31 @@ from langgraph.checkpoint.memory import InMemorySaver
 memory = InMemorySaver()
 config = {"configurable": {"thread_id": "1"}}
 
-graph_with_memory = builder.compile(checkpointer=memory)
+graph_with_memory = builder.compile()
 
-answers = graph_with_memory.invoke(
-    {"messages": [HumanMessage(content="Hi there! My name is Azher Ali.")]}, config
-)
+# answers = graph_with_memory.invoke(
+#     {"messages": [HumanMessage(content="Hi there! My name is Azher Ali.")]}, config
+# )
 
-for m in answers["messages"]:
-    m.pretty_print()
+# for m in answers["messages"]:
+#     m.pretty_print()
 
 
-user_input = "Remember my name?"
+# user_input = "Remember my name?"
 
-# The config is the **second positional argument** to stream() or invoke()!
-answers = graph_with_memory.invoke(
-    {"messages": [HumanMessage(content=user_input)]},
-    config
+# # The config is the **second positional argument** to stream() or invoke()!
+# answers = graph_with_memory.invoke(
+#     {"messages": [HumanMessage(content=user_input)]},
+#     config
     
-)
+# )
 
-for m in answers["messages"]:
-    m.pretty_print()
+# for m in answers["messages"]:
+#     m.pretty_print()
 
 
-snapshot = graph_with_memory.get_state(config)
-print(snapshot)
+# snapshot = graph_with_memory.get_state(config)
+# print(snapshot)
 
 # act let the model to call the specfic tool from the llm
 # observe : pass the tool output back to the model
