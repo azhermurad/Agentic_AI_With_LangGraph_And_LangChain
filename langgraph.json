@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "agent_with_memory": "./LangGraph/agent_reduicer.py:graph"
+    "agent_with_memory": "./LangGraph/summary_message.py:graph"
   },
   "env": ".env",
   "image_distro": "wolfi"
