@@ -10,7 +10,8 @@ from langchain_core.messages import (
 from typing import TypedDict, Annotated
 from langgraph.graph import MessagesState, StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
-
+import sqlite3
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 # loading env varables
 from dotenv import load_dotenv
@@ -25,6 +26,8 @@ os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY")
 
 # llm model
 llm = ChatGroq(model="llama-3.1-8b-instant")
+
+
 
 
 class State(MessagesState):
@@ -78,7 +81,7 @@ def chatbot(state: State):
 def should_summary(state: State):
     """Return the next node to execute."""
 
-    if len(state["messages"]) > 2:
+    if len(state["messages"]) > 6:
         return "summarize_conversation"
     return END
 
@@ -102,8 +105,14 @@ builder.add_conditional_edges(
 builder.add_edge("summarize_conversation", END)
 
 
-memory = InMemorySaver()
-graph = builder.compile(checkpointer=memory)
+# now we have to store the message in the mysql database 
+# memory = InMemorySaver()
+
+# 2. Create a database connection
+# This will create a file named "checkpoints.sqlite" or connect to it if it exists.
+conn = sqlite3.connect("checkpoints.sqlite",check_same_thread=False)
+memory = SqliteSaver(conn)
+graph = builder.compile()
 
 with open("diagram.png", "wb") as f:
     f.write(graph.get_graph().draw_mermaid_png())
@@ -126,6 +135,5 @@ for m in output["messages"]:
 
 
 
-print(graph.get_state(config).values.get("summary"))
 
 
