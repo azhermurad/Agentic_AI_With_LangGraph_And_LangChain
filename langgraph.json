@@ -2,7 +2,8 @@
   "dependencies": ["."],
   "graphs": {
     "agent_with_memory": "./LangGraph/summary_message.py:graph",
-    "chatbot_summary": "./LangGraph/summary_message.py:graph"
+    "chatbot_summary": "./LangGraph/summary_message.py:graph",
+    "human_in_loop": "./LangGraph/agent_with_human_in_loop.py:graph"
   },
   "env": ".env",
   "image_distro": "wolfi"
